@@ -16,6 +16,10 @@
         <quarkus.platform.version>3.27.1</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
+        <mapstruct.version>1.6.2</mapstruct.version>
+        <restassured.version>5.4.0</restassured.version>
+        <wiremock.version>3.9.1</wiremock.version>
+<!--        <bytebuddy.agent.version>1.17.5</bytebuddy.agent.version>-->
     </properties>
 
     <dependencyManagement>
@@ -37,7 +41,65 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-panache-mock</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -65,13 +127,20 @@
                 <version>${compiler-plugin.version}</version>
                 <configuration>
                     <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+<!--                    <argLine>&#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.agent.version}/byte-buddy-agent-${bytebuddy.agent.version}.jar</argLine>-->
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
@@ -90,7 +159,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+<!--                    <argLine>&#45;&#45;add-opens java.base/java.lang=ALL-UNNAMED -Djdk.attach.allowAttachSelf=true -XX:+EnableDynamicAgentLoading -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.agent.version}/byte-buddy-agent-${bytebuddy.agent.version}.jar</argLine>-->
                     <systemPropertyVariables>
                         <native.image.path>${project.build.directory}/${project.build.finalName}-runner
                         </native.image.path>
@@ -115,6 +184,48 @@
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
             </properties>
+        </profile>
+        <profile>
+            <id>orbstack-docker</id>
+            <activation>
+                <file>
+                    <exists>${user.home}/.orbstack/run/docker.sock</exists>
+                </file>
+            </activation>
+            <properties>
+                <orbstack.docker.socket>${user.home}/.orbstack/run/docker.sock</orbstack.docker.socket>
+                <orbstack.docker.host>unix://${orbstack.docker.socket}</orbstack.docker.host>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables combine.children="append">
+                                <DOCKER_HOST>${orbstack.docker.host}</DOCKER_HOST>
+                                <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>${orbstack.docker.socket}</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                            </environmentVariables>
+                            <systemPropertyVariables combine.children="append">
+                                <docker.host>${orbstack.docker.host}</docker.host>
+                                <testcontainers.docker.socket.override>${orbstack.docker.socket}</testcontainers.docker.socket.override>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables combine.children="append">
+                                <DOCKER_HOST>${orbstack.docker.host}</DOCKER_HOST>
+                                <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>${orbstack.docker.socket}</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                            </environmentVariables>
+                            <systemPropertyVariables combine.children="append">
+                                <docker.host>${orbstack.docker.host}</docker.host>
+                                <testcontainers.docker.socket.override>${orbstack.docker.socket}</testcontainers.docker.socket.override>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
