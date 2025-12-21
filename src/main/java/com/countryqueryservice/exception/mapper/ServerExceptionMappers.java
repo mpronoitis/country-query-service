@@ -2,6 +2,7 @@ package com.countryqueryservice.exception.mapper;
 
 import com.countryqueryservice.exception.CountryQueryException;
 import com.countryqueryservice.exception.ErrorResponse;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
@@ -12,7 +13,6 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 public class ServerExceptionMappers {
 
     private static final Logger LOGGER = Logger.getLogger(ServerExceptionMappers.class);
-
 
     @ServerExceptionMapper
     public Response toResponse(CountryQueryException exception) {
@@ -28,6 +28,15 @@ public class ServerExceptionMappers {
     }
 
     @ServerExceptionMapper
+    public Response toResponse(NotFoundException exception) {
+        LOGGER.debugf("Resource not found: %s", exception.getMessage());
+        return Response.status(Response.Status.NOT_FOUND)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(new ErrorResponse("Resource not found", "The requested resource could not be located."))
+                .build();
+    }
+
+    @ServerExceptionMapper
     public Response toResponse(Throwable exception) {
         LOGGER.error("Unexpected error", exception);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -35,5 +44,4 @@ public class ServerExceptionMappers {
                 .entity(new ErrorResponse("Unexpected error", "An unexpected error occurred. Please try again later."))
                 .build();
     }
-
 }

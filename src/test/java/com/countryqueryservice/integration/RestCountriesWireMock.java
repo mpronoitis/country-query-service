@@ -18,6 +18,7 @@ public class RestCountriesWireMock implements QuarkusTestResourceLifecycleManage
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMockServer.start();
         WireMock.configureFor("localhost", wireMockServer.port());
+        LOGGER.infof("WireMock started on %s", wireMockServer.baseUrl());
         wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/all"))
                 .withQueryParam("fields", WireMock.equalTo("name,cca2,currencies"))
                 .willReturn(WireMock.aResponse()

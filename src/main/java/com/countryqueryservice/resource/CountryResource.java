@@ -2,7 +2,9 @@ package com.countryqueryservice.resource;
 
 import com.countryqueryservice.exception.ErrorResponse;
 import com.countryqueryservice.model.CountryDTO;
+import com.countryqueryservice.model.CountryInfoResponse;
 import com.countryqueryservice.service.CountryService;
+import com.countryqueryservice.service.CountryInfoSoapService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -26,9 +28,12 @@ import java.util.List;
 public class CountryResource {
 
     private final CountryService countryService;
+    private final CountryInfoSoapService countryInfoSoapService;
 
-    public CountryResource(CountryService countryService) {
+    public CountryResource(CountryService countryService,
+                           CountryInfoSoapService countryInfoSoapService) {
         this.countryService = countryService;
+        this.countryInfoSoapService = countryInfoSoapService;
     }
 
     @GET
@@ -69,5 +74,25 @@ public class CountryResource {
             @Parameter(description = "ISO 3166-1 alpha-2 country code", example = "GR", required = true)
             @PathParam("countryCode") String countryCode) {
         return List.of(countryService.getByCode(countryCode));
+    }
+
+    @GET
+    @Path("/{countryCode}")
+    @Operation(summary = "Fetch country info from SOAP service", description = "Retrieves FullCountryInfo payload for the provided ISO 3166-1 alpha-2 code.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Country info retrieved",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = CountryInfoResponse.class))),
+            @APIResponse(responseCode = "400", description = "Invalid country code",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class))),
+            @APIResponse(responseCode = "404", description = "Country not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class))),
+            @APIResponse(responseCode = "502", description = "SOAP service failure",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public CountryInfoResponse getFullCountryInfo(
+            @Parameter(description = "ISO 3166-1 alpha-2 country code", example = "GR", required = true)
+            @PathParam("countryCode") String countryCode) {
+        return countryInfoSoapService.getCountryInfo(countryCode);
     }
 }
