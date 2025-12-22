@@ -1,7 +1,9 @@
 package com.countryqueryservice.integration;
 
+import com.countryqueryservice.service.CountryService;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -13,6 +15,9 @@ import static org.hamcrest.Matchers.hasSize;
 @QuarkusTest //load jvm and quarkus app runs
 @QuarkusTestResource(RestCountriesWireMock.class)
 class CountryResourceIT {
+
+    @Inject
+    CountryService countryService;
 
     @Test
     void currencyEndpointReturnsCountries() {

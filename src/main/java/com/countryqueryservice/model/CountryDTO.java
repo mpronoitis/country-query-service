@@ -10,13 +10,13 @@ public class CountryDTO {
     @Schema(description = "Commonly used country name", example = "Greece")
     private String commonName;
 
-    @Schema(description = "ISO 3166-1 alpha-2 code", example = "GR")
+    @Schema(description = "Country Code", example = "GR")
     private String code;
 
     @Schema(description = "Official country name", example = "Hellenic Republic")
     private String officialName;
 
-    @Schema(description = "ISO 4217 currency codes", example = "[\"EUR\"]")
+    @Schema(description = "Currency Codes", example = "[\"EUR\"]")
     private List<String> currencies;
 
     public String getCommonName() {

@@ -7,6 +7,7 @@ import com.countryqueryservice.mapper.CountryMapper;
 import com.countryqueryservice.model.ApiCountry;
 import com.countryqueryservice.model.CountryDTO;
 import com.countryqueryservice.repository.CountryRepository;
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,31 +51,32 @@ class CountryServiceTest {
     void fetchAndPersistCountries_persistsMappedCountries() {
         ApiCountry apiCountry = buildApiCountry("gr", "Greece", "Hellenic Republic");
         CountryEntity entity = buildCountryEntity("GR");
-        when(countryRestClient.getAllCountries()).thenReturn(List.of(apiCountry));
+        when(countryRestClient.getAllCountries()).thenReturn(Uni.createFrom().item(List.of(apiCountry)));
         when(countryMapper.toCountryEntity(apiCountry)).thenReturn(entity);
 
-        countryService.fetchAndPersistCountries();
+        countryService.fetchAndPersistCountries().await().indefinitely();
 
-        verify(countryRepository).persist((CountryEntity) entity);
+        verify(countryRepository).persist(entity);
     }
 
     @Test
     void fetchAndPersistCountries_skipsInvalidEntities() {
         ApiCountry apiCountry = buildApiCountry("gr", "Greece", "Hellenic Republic");
         CountryEntity invalid = new CountryEntity();
-        when(countryRestClient.getAllCountries()).thenReturn(List.of(apiCountry));
+        when(countryRestClient.getAllCountries()).thenReturn(Uni.createFrom().item(List.of(apiCountry)));
         when(countryMapper.toCountryEntity(apiCountry)).thenReturn(invalid);
 
-        countryService.fetchAndPersistCountries();
+        countryService.fetchAndPersistCountries().await().indefinitely();
 
         verify(countryRepository, never()).persist(Mockito.<CountryEntity>any());
     }
 
     @Test
     void fetchAndPersistCountries_propagatesExternalFailures() {
-        when(countryRestClient.getAllCountries()).thenThrow(new RuntimeException("down"));
+        when(countryRestClient.getAllCountries()).thenReturn(Uni.createFrom().failure(new RuntimeException("down")));
 
-        CountryQueryException exception = assertThrows(CountryQueryException.class, () -> countryService.fetchAndPersistCountries());
+        CountryQueryException exception = assertThrows(CountryQueryException.class,
+                () -> countryService.fetchAndPersistCountries().await().indefinitely());
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR, exception.getStatus());
     }
 
@@ -83,10 +84,10 @@ class CountryServiceTest {
     void getByCurrency_returnsMappedCountries() {
         CountryEntity entity = buildCountryEntity("GR");
         CountryDTO dto = buildCountryDTO("GR");
-        when(countryRepository.findByCurrency("EUR")).thenReturn(List.of(entity));
+        when(countryRepository.findByCurrency("EUR")).thenReturn(Uni.createFrom().item(List.of(entity)));
         when(countryMapper.toCountryDTO(entity)).thenReturn(dto);
 
-        List<CountryDTO> results = countryService.getByCurrency("EUR");
+        List<CountryDTO> results = countryService.getByCurrency("EUR").await().indefinitely();
 
         assertEquals(1, results.size());
         assertEquals("GR", results.getFirst().getCode());
@@ -94,9 +95,10 @@ class CountryServiceTest {
 
     @Test
     void getByCurrency_whenNoResults_throwsCurrencyNotFound() {
-        when(countryRepository.findByCurrency("EUR")).thenReturn(Collections.emptyList());
+        when(countryRepository.findByCurrency("EUR")).thenReturn(Uni.createFrom().item(Collections.emptyList()));
 
-        CountryQueryException exception = assertThrows(CountryQueryException.class, () -> countryService.getByCurrency("EUR"));
+        CountryQueryException exception = assertThrows(CountryQueryException.class,
+                () -> countryService.getByCurrency("EUR").await().indefinitely());
         assertEquals(Response.Status.NOT_FOUND, exception.getStatus());
     }
 
@@ -104,19 +106,20 @@ class CountryServiceTest {
     void getByCode_returnsCountry() {
         CountryEntity entity = buildCountryEntity("GR");
         CountryDTO dto = buildCountryDTO("GR");
-        when(countryRepository.findByCode("GR")).thenReturn(entity);
+        when(countryRepository.findByCode("GR")).thenReturn(Uni.createFrom().item(entity));
         when(countryMapper.toCountryDTO(entity)).thenReturn(dto);
 
-        CountryDTO result = countryService.getByCode("GR");
+        CountryDTO result = countryService.getByCode("GR").await().indefinitely();
 
         assertEquals("GR", result.getCode());
     }
 
     @Test
     void getByCode_whenMissing_throwsCountryNotFound() {
-        when(countryRepository.findByCode("GR")).thenReturn(null);
+        when(countryRepository.findByCode("GR")).thenReturn(Uni.createFrom().nullItem());
 
-        CountryQueryException exception = assertThrows(CountryQueryException.class, () -> countryService.getByCode("GR"));
+        CountryQueryException exception = assertThrows(CountryQueryException.class,
+                () -> countryService.getByCode("GR").await().indefinitely());
         assertEquals(Response.Status.NOT_FOUND, exception.getStatus());
     }
 
