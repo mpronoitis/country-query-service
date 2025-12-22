@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LanguageInfo {
 
-    @JsonProperty("ISOCode")
     private String isoCode;
 
-    @JsonProperty("name")
     private String name;
 
     public String getIsoCode() {

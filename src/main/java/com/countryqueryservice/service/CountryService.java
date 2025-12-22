@@ -43,8 +43,6 @@ public class CountryService {
         try {
             List<ApiCountry> apiCountries = countryRestClient.getAllCountries();
             List<ApiCountry> countries = apiCountries == null ? Collections.emptyList() : apiCountries;
-            countryRepository.deleteAll();
-            countryRepository.flush();
 
             for (ApiCountry apiCountry : countries) {
                 CountryEntity entity = countryMapper.toCountryEntity(apiCountry);
@@ -67,7 +65,6 @@ public class CountryService {
         }
     }
 
-    @Transactional(Transactional.TxType.SUPPORTS)
     public List<CountryDTO> getByCurrency(String currencyCode) {
         requestValidator.validateCurrencyCode(currencyCode);
         List<CountryDTO> results = countryRepository.findByCurrency(currencyCode).stream()
@@ -84,7 +81,6 @@ public class CountryService {
         return results;
     }
 
-    @Transactional(Transactional.TxType.SUPPORTS)
     public CountryDTO getByCode(String code) {
         requestValidator.validateCountryCode(code);
         CountryEntity entity = countryRepository.findByCode(code);

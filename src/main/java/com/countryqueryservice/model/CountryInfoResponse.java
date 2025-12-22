@@ -7,25 +7,18 @@ import java.util.List;
 
 public class CountryInfoResponse {
 
-    @JsonProperty("ISOCode")
     private String isoCode;
 
-    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("capitalCity")
     private String capitalCity;
 
-    @JsonProperty("phoneCode")
     private String phoneCode;
 
-    @JsonProperty("continentCode")
     private String continentCode;
 
-    @JsonProperty("currencyCode")
     private String currencyCode;
 
-    @JsonProperty("languages")
     private List<LanguageInfo> languages = new ArrayList<>();
 
     public String getIsoCode() {

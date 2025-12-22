@@ -70,10 +70,10 @@ class CountryResourceIT {
                 .when().get("/countries/GR")
                 .then()
                 .statusCode(200)
-                .body("ISOCode", equalTo("GR"))
+                .body("isoCode", equalTo("GR"))
                 .body("name", equalTo("Greece"))
                 .body("capitalCity", equalTo("Athens"))
-                .body("languages[0].ISOCode", equalTo("el"))
+                .body("languages[0].isoCode", equalTo("el"))
                 .body("languages[0].name", equalTo("Greek"));
     }
 
