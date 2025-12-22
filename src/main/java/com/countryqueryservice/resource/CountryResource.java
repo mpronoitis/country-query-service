@@ -33,7 +33,7 @@ public class CountryResource {
 
     @GET
     @Path("currency/{currencyCode}")
-    @Operation(summary = "Find countries by currency", description = "Returns all countries using the provided ISO 4217 currency code.")
+    @Operation(summary = "Find countries by currency", description = "Returns all countries using the provided currency code.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Countries found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -46,14 +46,14 @@ public class CountryResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     })
     public List<CountryDTO> getByCurrency(
-            @Parameter(description = "ISO 4217 currency code", example = "EUR", required = true)
+            @Parameter(description = "currency code", example = "EUR", required = true)
             @PathParam("currencyCode") String currencyCode) {
         return countryService.getByCurrency(currencyCode);
     }
 
     @GET
     @Path("code/{countryCode}")
-    @Operation(summary = "Find country by ISO code", description = "Returns a single country, wrapped in a JSON array, for the provided ISO 3166-1 alpha-2 code.")
+    @Operation(summary = "Find country by country code", description = "Returns a single country, wrapped in a JSON array, for the provided code.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Country found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -66,7 +66,7 @@ public class CountryResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     })
     public List<CountryDTO> getByCode(
-            @Parameter(description = "ISO 3166-1 alpha-2 country code", example = "GR", required = true)
+            @Parameter(description = "country code", example = "GR", required = true)
             @PathParam("countryCode") String countryCode) {
         return List.of(countryService.getByCode(countryCode));
     }

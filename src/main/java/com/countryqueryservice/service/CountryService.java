@@ -43,8 +43,6 @@ public class CountryService {
         try {
             List<ApiCountry> apiCountries = countryRestClient.getAllCountries();
             List<ApiCountry> countries = apiCountries == null ? Collections.emptyList() : apiCountries;
-            countryRepository.deleteAll();
-            countryRepository.flush();
 
             for (ApiCountry apiCountry : countries) {
                 CountryEntity entity = countryMapper.toCountryEntity(apiCountry);
