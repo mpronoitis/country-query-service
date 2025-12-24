@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<bindings
+        xmlns="https://jakarta.ee/xml/ns/jaxws"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        wsdlLocation="CountryInfoService.wsdl">
+
+    <bindings node="wsdl:definitions">
+        <enableAsyncMapping>true</enableAsyncMapping>
+    </bindings>
+
+</bindings>

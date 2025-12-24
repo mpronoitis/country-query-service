@@ -4,6 +4,7 @@ import com.countryqueryservice.client.CountryInfoSoapClient;
 import com.countryqueryservice.exception.CountryQueryException;
 import com.countryqueryservice.model.CountryInfoResponse;
 import com.countryqueryservice.model.LanguageInfo;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -15,6 +16,7 @@ import org.oorsprong.websamples.TLanguage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @ApplicationScoped
 public class CountryInfoSoapService {
@@ -30,27 +32,30 @@ public class CountryInfoSoapService {
         this.requestValidator = requestValidator;
     }
 
-    public CountryInfoResponse getCountryInfo(String countryCode) {
+    public Uni<CountryInfoResponse> getCountryInfo(String countryCode) {
         requestValidator.validateCountryCode(countryCode);
-        try {
-            TCountryInfo countryInfo = soapClient.getFullCountryInfo(countryCode);
-            if (countryInfo == null || isBlank(countryInfo.getSISOCode())) {
-                throw new CountryQueryException(Response.Status.NOT_FOUND,
-                        "Country not found",
-                        "Country with ISO code %s was not found in SOAP service.".formatted(countryCode));
-            }
-            LOGGER.debugf("Retrieved country %s from SOAP service.", countryInfo.getSName());
-            return mapToResponse(countryInfo);
-        } catch (CountryQueryException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            LOGGER.errorf(exception, "Failed to fetch country %s from SOAP service.", countryCode);
-            throw new CountryQueryException(
-                    Response.Status.BAD_GATEWAY,
-                    "Country info unavailable",
-                    "Failed to retrieve country information from SOAP service."
-            );
-        }
+        CompletableFuture<TCountryInfo> resourceFuture = new CompletableFuture<>();
+
+        return soapClient.getFullCountryInfoAsync(countryCode, resourceFuture)
+                .map(countryInfo -> {
+                    if (countryInfo == null || isBlank(countryInfo.getSISOCode())) {
+                        throw new CountryQueryException(Response.Status.NOT_FOUND,
+                                "Country not found",
+                                "Country with ISO code %s was not found in SOAP service.".formatted(countryCode));
+                    }
+                    LOGGER.debugf("Retrieved country %s from SOAP service.", countryInfo.getSName());
+                    return mapToResponse(countryInfo);
+                })
+                .onFailure().transform(throwable -> {
+                    if (throwable instanceof CountryQueryException exception) {
+                        return exception;
+                    }
+                    return new CountryQueryException(
+                            Response.Status.BAD_GATEWAY,
+                            "Failed to fetch country info from SOAP async service.",
+                            "Failed to fetch country info from SOAP async service."
+                    );
+                });
     }
 
     private CountryInfoResponse mapToResponse(TCountryInfo info) {
@@ -85,4 +90,5 @@ public class CountryInfoSoapService {
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
+
 }

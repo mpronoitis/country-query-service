@@ -83,7 +83,6 @@ public class CountryService {
                     return Uni.createFrom().item(dtoList);
                 })
                 .invoke(dtoList -> LOGGER.debugf("Found %d countries for currency %s.", dtoList.size(), currencyCode));
-
     }
     @WithSession
     public Uni<CountryDTO> getByCode(String code) {

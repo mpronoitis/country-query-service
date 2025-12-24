@@ -92,7 +92,7 @@ public class CountryResource {
             @APIResponse(responseCode = "502", description = "SOAP service failure",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public CountryInfoResponse getFullCountryInfo(
+    public Uni<CountryInfoResponse> getFullCountryInfo(
             @Parameter(description = "ISO 3166-1 alpha-2 country code", example = "GR", required = true)
             @PathParam("countryCode") String countryCode) {
         return countryInfoSoapService.getCountryInfo(countryCode);

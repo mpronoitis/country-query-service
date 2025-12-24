@@ -2,6 +2,7 @@ package com.countryqueryservice.soap;
 
 import com.countryqueryservice.soap.model.CountryReq;
 import com.countryqueryservice.soap.model.CountryRes;
+import io.smallrye.mutiny.Uni;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebParam;
 import jakarta.jws.WebResult;

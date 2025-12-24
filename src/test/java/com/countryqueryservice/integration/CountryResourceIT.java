@@ -91,8 +91,8 @@ class CountryResourceIT {
                 .when().get("/countries/GR")
                 .then()
                 .statusCode(502)
-                .body("error", equalTo("Country info unavailable"))
-                .body("details", containsString("Failed to retrieve country information"));
+                .body("error", equalTo("Failed to fetch country info from SOAP async service."))
+                .body("details", containsString("Failed to fetch country info from SOAP async service."));
     }
 
     @Test
