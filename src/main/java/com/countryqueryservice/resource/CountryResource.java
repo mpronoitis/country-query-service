@@ -38,7 +38,7 @@ public class CountryResource {
 
     @GET
     @Path("currency/{currencyCode}")
-    @Operation(summary = "Find countries by currency", description = "Returns all countries using the provided ISO 4217 currency code.")
+    @Operation(summary = "Find countries by currency", description = "Returns all countries using the provided currency code.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Countries found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -58,7 +58,7 @@ public class CountryResource {
 
     @GET
     @Path("code/{countryCode}")
-    @Operation(summary = "Find country by ISO code", description = "Returns a single country, wrapped in a JSON array, for the provided ISO 3166-1 alpha-2 code.")
+    @Operation(summary = "Find country by code", description = "Returns a single country, wrapped in a JSON array, for the provided code.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Country found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -78,7 +78,7 @@ public class CountryResource {
 
     @GET
     @Path("/{countryCode}")
-    @Operation(summary = "Fetch country info from SOAP service", description = "Retrieves FullCountryInfo payload for the provided ISO 3166-1 alpha-2 code.")
+    @Operation(summary = "Fetch country info from SOAP service", description = "Retrieves FullCountryInfo payload for the provided code.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Country info retrieved",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON,
@@ -91,7 +91,7 @@ public class CountryResource {
                     content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorResponse.class)))
     })
     public CountryInfoResponse getFullCountryInfo(
-            @Parameter(description = "ISO 3166-1 alpha-2 country code", example = "GR", required = true)
+            @Parameter(description = "Country code", example = "GR", required = true)
             @PathParam("countryCode") String countryCode) {
         return countryInfoSoapService.getCountryInfo(countryCode);
     }
