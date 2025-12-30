@@ -9,8 +9,6 @@ import java.util.Map;
 
 public class RestCountriesWireMock implements QuarkusTestResourceLifecycleManager {
 
-    private static final Logger LOGGER = Logger.getLogger(RestCountriesWireMock.class);
-
     private WireMockServer wireMockServer;
 
     @Override

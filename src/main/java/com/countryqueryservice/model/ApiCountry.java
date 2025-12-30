@@ -1,10 +1,8 @@
 package com.countryqueryservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiCountry {
 
     private Name name;
@@ -35,7 +33,6 @@ public class ApiCountry {
         this.currencies = currencies;
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Name {
         private String common;
         private String official;
@@ -57,7 +54,6 @@ public class ApiCountry {
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Currency {
         private String name;
         private String symbol;

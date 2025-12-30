@@ -16,11 +16,6 @@ public class ServerExceptionMappers {
 
     @ServerExceptionMapper
     public Response toResponse(CountryQueryException exception) {
-        if (exception.getStatus().getStatusCode() >= 500) {
-            LOGGER.error(exception.getError(), exception);
-        } else {
-            LOGGER.debug(exception.getError(), exception);
-        }
         return Response.status(exception.getStatus())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(new ErrorResponse(exception.getError(), exception.getDetails()))
