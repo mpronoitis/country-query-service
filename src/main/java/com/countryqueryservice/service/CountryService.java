@@ -65,6 +65,7 @@ public class CountryService {
         }
     }
 
+    @Transactional
     public List<CountryDTO> getByCurrency(String currencyCode) {
         requestValidator.validateCurrencyCode(currencyCode);
         List<CountryDTO> results = countryRepository.findByCurrency(currencyCode).stream()
@@ -81,6 +82,7 @@ public class CountryService {
         return results;
     }
 
+    @Transactional
     public CountryDTO getByCode(String code) {
         requestValidator.validateCountryCode(code);
         CountryEntity entity = countryRepository.findByCode(code);

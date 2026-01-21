@@ -7,7 +7,9 @@ import com.countryqueryservice.soap.model.CountryRes;
 import com.countryqueryservice.soap.model.SoapCountry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.jws.WebService;
+import jdk.jfr.Name;
 
 import java.util.List;
 
